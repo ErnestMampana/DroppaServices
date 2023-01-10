@@ -40,7 +40,7 @@ public class CountryService {
 
 	public Country addCountry(Country country) {
 		country.setId(countryIdMap.size() + 1);
-		countryIdMap.put(country.getId(), country);
+		countryIdMap.put(9, country);
 		return country;
 	}
 

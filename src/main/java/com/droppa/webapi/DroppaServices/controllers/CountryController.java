@@ -42,6 +42,7 @@ public class CountryController {
 	}
 
 	@POST
+	@Path("/addcountry")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Country addCountry(Country country) {
 		return countryService.addCountry(country);

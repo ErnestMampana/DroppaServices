@@ -7,6 +7,19 @@ public class Person {
 	private String celphone;
 	private String walletBalance;
 
+	public Person() {
+		super();
+	}
+
+	public Person(String id, String userName, String surname, String celphone, String walletBalance) {
+		super();
+		this.id = id;
+		this.userName = userName;
+		this.surname = surname;
+		this.celphone = celphone;
+		this.walletBalance = walletBalance;
+	}
+
 	public String getId() {
 		return id;
 	}
@@ -46,5 +59,13 @@ public class Person {
 	public void setWalletBalance(String walletBalance) {
 		this.walletBalance = walletBalance;
 	}
+
+	@Override
+	public String toString() {
+		return "Person [id=" + id + ", userName=" + userName + ", surname=" + surname + ", celphone=" + celphone
+				+ ", walletBalance=" + walletBalance + "]";
+	}
+
+	
 
 }
