@@ -6,11 +6,11 @@ import java.util.List;
 
 import com.droppa.webapi.DroppaServices.bean.Country;
 
-public class CountryService {
+public class BookingService {
 
 	static HashMap<Integer, Country> countryIdMap = getCountryIdMap();
 
-	public CountryService() {
+	public BookingService() {
 		super();
 
 		if (countryIdMap == null) {

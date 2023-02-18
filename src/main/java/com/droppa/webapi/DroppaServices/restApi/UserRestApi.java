@@ -2,11 +2,11 @@ package com.droppa.webapi.DroppaServices.restApi;
 
 import java.util.List;
 
-import com.droppa.webapi.DroppaServices.CountryService;
+import javax.ejb.EJB;
+
 import com.droppa.webapi.DroppaServices.UserService;
 import com.droppa.webapi.DroppaServices.bean.Person;
 import com.droppa.webapi.DroppaServices.bean.UserAccount;
-
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -15,7 +15,8 @@ import jakarta.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class UserRestApi {
-
+	
+	@EJB
 	UserService userService = new UserService();
 
 	@GET
@@ -52,5 +53,4 @@ public class UserRestApi {
 		return userService.updateUserProfile(person);
 	}
 	
-
 }

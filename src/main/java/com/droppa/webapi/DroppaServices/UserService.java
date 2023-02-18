@@ -5,9 +5,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 
+import javax.ejb.Local;
+import javax.ejb.Stateless;
+
 import com.droppa.webapi.DroppaServices.bean.Person;
 import com.droppa.webapi.DroppaServices.bean.UserAccount;
+import com.droppa.webapi.DroppaServices.core.AccountStatus;
 
+@Stateless
+@Local
 public class UserService {
 
 	static HashMap<Integer, UserAccount> userIdMap = getPersonIdMap();
@@ -23,9 +29,9 @@ public class UserService {
 			// Creating some object of countries while initializing
 
 			Person myself = new Person("this5421thlamjn", "Ernest", "Mampana", "0723568069", "R9000");
-			Person someone = new Person("th845421thlamjn", "Barleycan", "Malefo", "0755662321", "R5000");
+			//Person someone = new Person("th845421thlamjn", "Barleycan", "Malefo", "0755662321", "R5000");
 
-			UserAccount myAccount = new UserAccount(myself, false);
+			UserAccount myAccount = new UserAccount(myself, true, 0,AccountStatus.ACTIVE.toString() );
 
 			userIdMap.put(1, myAccount);
 			// userIdMap.put(2, myself);
@@ -34,11 +40,10 @@ public class UserService {
 
 	public List<UserAccount> getAllUsers() {
 		List<UserAccount> users = new ArrayList<UserAccount>(userIdMap.values());
-		logger.info("Ernest ============ Fetching users");
-		int otp = party.generateOTP("");
 		return users;
 	}
 
+	
 	public Person createUserAccount(Person person) {
 
 		if (person.getCelphone().isBlank()) {
@@ -47,12 +52,14 @@ public class UserService {
 			dummyUser.setOwner(person);
 			dummyUser.setConfirmed(false);
 			dummyUser.setOtp(party.generateOTP(person.getCelphone()));
+			dummyUser.setStatus(AccountStatus.AWAITING_CONFIRMATION.toString());
 			userIdMap.put(2, dummyUser);
 			System.out.println("Ernest Loggs ===================== user " + person.getUserName() + " has been created");
 		}
 
 		return person;
 	}
+	
 
 	public UserAccount updateUserProfile(UserAccount person) {
 //		if (Integer.parseInt(person.getId()) <= 0)
@@ -73,11 +80,12 @@ public class UserService {
 		System.out.println("******************* " + celphone + "%%%%%%%%%%%%%%%%%%%% "+otp);
 		List<UserAccount> users = new ArrayList<UserAccount>(userIdMap.values());
 		for (int i = 1; i <= users.size() - 1; i++) {
-			System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^ "+users.get(i).getOwner().getCelphone());
+			System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^ "+users.get(i).getOwner().getCelphone());
 			if (users.get(i).getOwner().getCelphone().equals(celphone)) {
 				if (otp == users.get(i).getOtp()) {
 					dummyUser.setConfirmed(true);
 					dummyUser.setOwner(users.get(i).getOwner());
+					dummyUser.setStatus(AccountStatus.ACTIVE.toString());
 					userIdMap.put(2, dummyUser);
 					logger.info("===================== User Confirmed ===================");
 				}

@@ -5,6 +5,7 @@ public class UserAccount {
 	public Person owner;
 	public boolean confirmed;
 	public int otp;
+	public String status;
 	
 	public UserAccount() {
 		super();
@@ -12,10 +13,21 @@ public class UserAccount {
 	}
 
 
-	public UserAccount(Person owner, boolean confirmed) {
+	public UserAccount(Person owner, boolean confirmed, int otp, String status) {
 		super();
 		this.owner = owner;
 		this.confirmed = confirmed;
+		this.otp = otp;
+		this.status = status;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+
+	public void setStatus(String status) {
+		this.status = status;
 	}
 
 

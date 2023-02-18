@@ -1,7 +1,7 @@
 package com.droppa.webapi.DroppaServices.restApi;
 
 import java.util.List;
-import com.droppa.webapi.DroppaServices.CountryService;
+import com.droppa.webapi.DroppaServices.BookingService;
 import com.droppa.webapi.DroppaServices.bean.Country;
 
 import jakarta.ws.rs.DELETE;
@@ -15,7 +15,7 @@ import jakarta.ws.rs.core.MediaType;
 
 @Path("countries")
 public class CountryController {
-	CountryService countryService = new CountryService();
+	BookingService countryService = new BookingService();
 
 	@GET
 	@Path("/viewall")

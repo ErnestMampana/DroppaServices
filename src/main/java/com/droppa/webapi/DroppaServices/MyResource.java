@@ -27,7 +27,7 @@ public class MyResource {
 //        return "Got it!";
 //    }
     
-    CountryService countryService = new CountryService();
+    BookingService countryService = new BookingService();
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
