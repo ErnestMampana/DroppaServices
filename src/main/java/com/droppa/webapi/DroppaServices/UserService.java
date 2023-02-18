@@ -3,52 +3,90 @@ package com.droppa.webapi.DroppaServices;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
+
 import com.droppa.webapi.DroppaServices.bean.Person;
+import com.droppa.webapi.DroppaServices.bean.UserAccount;
 
 public class UserService {
 
-	static HashMap<Integer, Person> userIdMap = getPersonIdMap();
+	static HashMap<Integer, UserAccount> userIdMap = getPersonIdMap();
+	UserAccount dummyUser = new UserAccount();
+	PartyService party = new PartyService();
+	private static final Logger logger = Logger.getLogger(UserService.class.getName());
 
 	public UserService() {
 		super();
 		// TODO Auto-generated constructor stub
 		if (userIdMap == null) {
-			userIdMap = new HashMap<Integer, Person>();
+			userIdMap = new HashMap<Integer, UserAccount>();
 			// Creating some object of countries while initializing
+
 			Person myself = new Person("this5421thlamjn", "Ernest", "Mampana", "0723568069", "R9000");
 			Person someone = new Person("th845421thlamjn", "Barleycan", "Malefo", "0755662321", "R5000");
 
-			userIdMap.put(1, someone);
-			userIdMap.put(2, myself);
+			UserAccount myAccount = new UserAccount(myself, false);
+
+			userIdMap.put(1, myAccount);
+			// userIdMap.put(2, myself);
 		}
 	}
 
-	public List<Person> getAllUsers() {
-		List<Person> users = new ArrayList<Person>(userIdMap.values());
+	public List<UserAccount> getAllUsers() {
+		List<UserAccount> users = new ArrayList<UserAccount>(userIdMap.values());
+		logger.info("Ernest ============ Fetching users");
+		int otp = party.generateOTP("");
 		return users;
 	}
 
 	public Person createUserAccount(Person person) {
-		userIdMap.put(3, person);
-		return person;
-	}
-	
-	public Person updateUserProfile(Person person) {
-//		if (Integer.parseInt(person.getId()) <= 0)
-//			return null;
-		List<Person> users = new ArrayList<Person>(userIdMap.values());
-		System.out.println("Ernest ======================== : "+ users.size());
-		for(int i = 1 ; i <= users.size(); i++) {
-			System.out.println("Ernest ======================== : "+ users.get(i).getId());
-			if(users.get(i).getId() == person.getId()) {
-				userIdMap.put(1, person);
-			}
+
+		if (person.getCelphone().isBlank()) {
+			logger.info("Ernest Loggs ===================== Cellphone cannot be null");
+		} else {
+			dummyUser.setOwner(person);
+			dummyUser.setConfirmed(false);
+			dummyUser.setOtp(party.generateOTP(person.getCelphone()));
+			userIdMap.put(2, dummyUser);
+			System.out.println("Ernest Loggs ===================== user " + person.getUserName() + " has been created");
 		}
-		
+
 		return person;
 	}
 
-	public static HashMap<Integer, Person> getPersonIdMap() {
+	public UserAccount updateUserProfile(UserAccount person) {
+//		if (Integer.parseInt(person.getId()) <= 0)
+//			return null;
+		List<UserAccount> users = new ArrayList<UserAccount>(userIdMap.values());
+		System.out.println("Ernest ======================== : " + users.size());
+		for (int i = 1; i <= users.size(); i++) {
+			System.out.println("Ernest ======================== : " + users.get(i).getOwner().getId());
+			if (users.get(i).getOwner().getId() == person.owner.getId()) {
+				userIdMap.put(1, person);
+			}
+		}
+
+		return person;
+	}
+
+	public void confirmMobile(String celphone, int otp) {
+		System.out.println("******************* " + celphone + "%%%%%%%%%%%%%%%%%%%% "+otp);
+		List<UserAccount> users = new ArrayList<UserAccount>(userIdMap.values());
+		for (int i = 1; i <= users.size() - 1; i++) {
+			System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^ "+users.get(i).getOwner().getCelphone());
+			if (users.get(i).getOwner().getCelphone().equals(celphone)) {
+				if (otp == users.get(i).getOtp()) {
+					dummyUser.setConfirmed(true);
+					dummyUser.setOwner(users.get(i).getOwner());
+					userIdMap.put(2, dummyUser);
+					logger.info("===================== User Confirmed ===================");
+				}
+			}
+		}
+
+	}
+
+	public static HashMap<Integer, UserAccount> getPersonIdMap() {
 		return userIdMap;
 	}
 }

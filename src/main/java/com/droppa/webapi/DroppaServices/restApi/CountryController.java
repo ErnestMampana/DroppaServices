@@ -1,4 +1,4 @@
-package com.droppa.webapi.DroppaServices.controllers;
+package com.droppa.webapi.DroppaServices.restApi;
 
 import java.util.List;
 import com.droppa.webapi.DroppaServices.CountryService;
