@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.ejb.EJB;
 
+import com.droppa.webapi.Droppa.DAO.MySqlConnection;
+import com.droppa.webapi.Droppa.DAO.UserAccountDAO;
 import com.droppa.webapi.DroppaServices.UserService;
 import com.droppa.webapi.DroppaServices.bean.Person;
 import com.droppa.webapi.DroppaServices.bean.UserAccount;
@@ -35,8 +37,8 @@ public class UserRestApi {
 	@POST
 	@Path("/mobile/confirmation/{mobile}/{code}")
 	public Response confirmMobile(@PathParam("code") int code,@PathParam("mobile") String mobile) {
-		userService.confirmMobile(mobile,code);
-		return Response.ok().build();
+		String resp = userService.confirmMobile(mobile,code);
+		return Response.ok(resp).build();
 	}
 	
 	

@@ -1,35 +1,45 @@
 package com.droppa.webapi.DroppaServices.bean;
 
+import jakarta.validation.constraints.NotNull;
+
 public class UserAccount {
 
-	public Person owner;
-	public boolean confirmed;
-	public int otp;
-	public String status;
-	
+	@NotNull
+	private String id;
+	private Person owner;
+	private boolean confirmed;
+	private int otp;
+	private String status;
+
 	public UserAccount() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-
-	public UserAccount(Person owner, boolean confirmed, int otp, String status) {
+	public UserAccount(@NotNull String id, Person owner, boolean confirmed, int otp, String status) {
 		super();
+		this.id = id;
 		this.owner = owner;
 		this.confirmed = confirmed;
 		this.otp = otp;
 		this.status = status;
 	}
 
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
 	public String getStatus() {
 		return status;
 	}
 
-
 	public void setStatus(String status) {
 		this.status = status;
 	}
-
 
 	public Person getOwner() {
 		return owner;
@@ -39,11 +49,9 @@ public class UserAccount {
 		return otp;
 	}
 
-
 	public void setOtp(int otp) {
 		this.otp = otp;
 	}
-
 
 	public void setOwner(Person owner) {
 		this.owner = owner;
@@ -57,5 +65,4 @@ public class UserAccount {
 		this.confirmed = confirmed;
 	}
 
-	
 }

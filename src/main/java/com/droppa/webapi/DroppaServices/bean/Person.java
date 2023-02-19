@@ -6,19 +6,37 @@ public class Person {
 	private String surname;
 	private String celphone;
 	private String walletBalance;
+	private String email;
 
 	public Person() {
 		super();
 	}
 
-	public Person(String id, String userName, String surname, String celphone, String walletBalance) {
+	
+
+	public Person(String id, String userName, String surname, String celphone, String walletBalance, String email) {
 		super();
 		this.id = id;
 		this.userName = userName;
 		this.surname = surname;
 		this.celphone = celphone;
 		this.walletBalance = walletBalance;
+		this.email = email;
 	}
+
+
+
+	public String getEmail() {
+		return email;
+	}
+
+
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+
 
 	public String getId() {
 		return id;
