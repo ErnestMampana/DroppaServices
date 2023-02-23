@@ -1,4 +1,4 @@
-package com.droppa.webapi.DroppaServices.bean;
+package com.droppa.webapi.Droppa.pojo;
 
 public class Country {
 	int id;

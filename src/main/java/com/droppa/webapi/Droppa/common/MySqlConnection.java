@@ -1,4 +1,4 @@
-package com.droppa.webapi.Droppa.DAO;
+package com.droppa.webapi.Droppa.common;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

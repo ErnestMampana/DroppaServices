@@ -1,8 +1,8 @@
-package com.droppa.webapi.DroppaServices;
+package com.droppa.webapi.DroppaServices.bean;
 
 import java.util.List;
 
-import com.droppa.webapi.DroppaServices.bean.Country;
+import com.droppa.webapi.Droppa.pojo.Country;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -29,11 +29,4 @@ public class MyResource {
     
     BookingService countryService = new BookingService();
 
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public List<Country> getCountries() {
-
-		List<Country> listOfCountries = countryService.getAllCountries();
-		return listOfCountries;
 	}
-}
