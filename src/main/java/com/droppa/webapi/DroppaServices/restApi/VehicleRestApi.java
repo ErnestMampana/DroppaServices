@@ -3,9 +3,10 @@ package com.droppa.webapi.DroppaServices.restApi;
 import java.util.List;
 import javax.ejb.EJB;
 
-import com.droppa.webapi.Droppa.DTO.VehicleDTO;
-import com.droppa.webapi.Droppa.pojo.Vehicle;
+import com.droppa.webapi.DroppaServices.DTO.VehicleDTO;
 import com.droppa.webapi.DroppaServices.bean.VehicleService;
+import com.droppa.webapi.DroppaServices.pojo.Vehicle;
+
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;

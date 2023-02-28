@@ -1,4 +1,4 @@
-package com.droppa.webapi.Droppa.common;
+package com.droppa.webapi.DroppaServices.common;
 
 public class ClientException extends RuntimeException {
 

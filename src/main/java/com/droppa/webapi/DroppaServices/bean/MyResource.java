@@ -2,7 +2,7 @@ package com.droppa.webapi.DroppaServices.bean;
 
 import java.util.List;
 
-import com.droppa.webapi.Droppa.pojo.Country;
+import com.droppa.webapi.DroppaServices.pojo.Country;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;

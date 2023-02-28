@@ -1,15 +1,15 @@
-package com.droppa.webapi.Droppa.pojo;
+package com.droppa.webapi.DroppaServices.pojo;
 
 public class DropDetails {
 	private String name;
 	private String surname;
-	private long contact;
+	private String contact;
 
 	public DropDetails() {
 		super();
 	}
 
-	public DropDetails(String name, String surname, long contact) {
+	public DropDetails(String name, String surname, String contact) {
 		super();
 		this.name = name;
 		this.surname = surname;
@@ -32,11 +32,11 @@ public class DropDetails {
 		this.surname = surname;
 	}
 
-	public long getContact() {
+	public String getContact() {
 		return contact;
 	}
 
-	public void setContact(long contact) {
+	public void setContact(String contact) {
 		this.contact = contact;
 	}
 

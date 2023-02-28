@@ -10,14 +10,14 @@ import javax.ejb.EJB;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 
-import com.droppa.webapi.Droppa.DTO.CompanyDTO;
-import com.droppa.webapi.Droppa.common.ClientException;
-import com.droppa.webapi.Droppa.common.MySqlConnection;
-import com.droppa.webapi.Droppa.pojo.Company;
-import com.droppa.webapi.Droppa.pojo.DriverAccount;
-import com.droppa.webapi.Droppa.pojo.Person;
-import com.droppa.webapi.Droppa.pojo.Vehicle;
-import com.droppa.webapi.Droppa.pojo.VehicleDriver;
+import com.droppa.webapi.DroppaServices.DTO.CompanyDTO;
+import com.droppa.webapi.DroppaServices.common.ClientException;
+import com.droppa.webapi.DroppaServices.common.MySqlConnection;
+import com.droppa.webapi.DroppaServices.pojo.Company;
+import com.droppa.webapi.DroppaServices.pojo.DriverAccount;
+import com.droppa.webapi.DroppaServices.pojo.Person;
+import com.droppa.webapi.DroppaServices.pojo.Vehicle;
+import com.droppa.webapi.DroppaServices.pojo.VehicleDriver;
 import com.google.gson.Gson;
 
 @Stateless

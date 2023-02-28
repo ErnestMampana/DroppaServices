@@ -1,9 +1,14 @@
 package com.droppa.webapi.DroppaServices.restApi;
 
+import java.util.List;
+
 import javax.ejb.EJB;
-import com.droppa.webapi.Droppa.DTO.BookingDTO;
-import com.droppa.webapi.Droppa.pojo.Booking;
+
+import com.droppa.webapi.DroppaServices.Auth.Secured;
+import com.droppa.webapi.DroppaServices.DTO.BookingDTO;
 import com.droppa.webapi.DroppaServices.bean.BookingService;
+import com.droppa.webapi.DroppaServices.pojo.Booking;
+
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -21,23 +26,26 @@ public class BookingsRestApi {
 	@EJB
 	private BookingService bookingService = new BookingService();
 	
+	//@Secured
 	@POST
 	@Path("/book")
 	public Response createBooking(BookingDTO bookingDto) {
 		Booking book = bookingService.createBooking(bookingDto);
-		return Response.ok().entity(bookingDto).build();
+		return Response.ok().entity(book).build();
 	}
 	
 	@GET
 	@Path("/getAllBokings")
 	public Response getAllBookings() {
-		return Response.ok().entity(bookingService).build();
+		List<Booking> bookings = bookingService.getAllBookings();
+		return Response.ok().entity(bookings).build();
 	}
-//	
-//	@GET
-//	@Path("/bookingById/{id}")
-//	public Response getBookingById(@PathParam("id") String id) {
-//		return Response.ok().entity(id).build();
-//	}
+	
+	@GET
+	@Path("/bookingById/{id}")
+	public Response getBookingById(@PathParam("id") String id) {
+		Booking booking = bookingService.getBookingById(id);
+		return Response.ok().entity(booking).build();
+	}
 
 }

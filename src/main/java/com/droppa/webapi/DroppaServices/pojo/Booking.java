@@ -1,4 +1,6 @@
-package com.droppa.webapi.Droppa.pojo;
+package com.droppa.webapi.DroppaServices.pojo;
+
+import com.droppa.webapi.DroppaServices.core.BookingStatus;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -15,14 +17,18 @@ public class Booking {
 	private String userId;
 	private DropDetails pickupDetails;
 	private DropDetails dropOffDetails;
+	private String bookingDate;
 	private double price;
+	private String assinedDriver;
+	private BookingStatus status;
 
 	public Booking() {
 		super();
 	}
 
 	public Booking(@NotNull @NotEmpty @NotBlank String bookingId, Adress pickupAdress, Adress dropOffAdress,
-			String userId, DropDetails pickupDetails, DropDetails dropOffDetails, double price) {
+			String userId, DropDetails pickupDetails, DropDetails dropOffDetails, String bookingDate, double price,
+			String assinedDriver, BookingStatus status) {
 		super();
 		this.bookingId = bookingId;
 		this.pickupAdress = pickupAdress;
@@ -30,7 +36,34 @@ public class Booking {
 		this.userId = userId;
 		this.pickupDetails = pickupDetails;
 		this.dropOffDetails = dropOffDetails;
+		this.bookingDate = bookingDate;
 		this.price = price;
+		this.assinedDriver = assinedDriver;
+		this.status = status;
+	}
+
+	public String getAssinedDriver() {
+		return assinedDriver;
+	}
+
+	public void setAssinedDriver(String assinedDriver) {
+		this.assinedDriver = assinedDriver;
+	}
+
+	public BookingStatus getStatus() {
+		return status;
+	}
+
+	public void setStatus(BookingStatus status) {
+		this.status = status;
+	}
+
+	public String getBookingDate() {
+		return bookingDate;
+	}
+
+	public void setBookingDate(String bookingDate) {
+		this.bookingDate = bookingDate;
 	}
 
 	public String getBookingId() {

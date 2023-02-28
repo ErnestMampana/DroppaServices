@@ -4,20 +4,20 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
 import javax.ejb.EJB;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
-import com.droppa.webapi.Droppa.DTO.BookingDTO;
-import com.droppa.webapi.Droppa.common.ClientException;
-import com.droppa.webapi.Droppa.common.MySqlConnection;
-import com.droppa.webapi.Droppa.pojo.Adress;
-import com.droppa.webapi.Droppa.pojo.Booking;
-import com.droppa.webapi.Droppa.pojo.DropDetails;
-import com.droppa.webapi.Droppa.pojo.Person;
-import com.droppa.webapi.Droppa.pojo.UserAccount;
+
+import com.droppa.webapi.DroppaServices.DTO.BookingDTO;
+import com.droppa.webapi.DroppaServices.common.ClientException;
+import com.droppa.webapi.DroppaServices.common.MySqlConnection;
+import com.droppa.webapi.DroppaServices.core.BookingStatus;
+import com.droppa.webapi.DroppaServices.pojo.Adress;
+import com.droppa.webapi.DroppaServices.pojo.Booking;
+import com.droppa.webapi.DroppaServices.pojo.DropDetails;
+import com.droppa.webapi.DroppaServices.pojo.Person;
 import com.google.gson.Gson;
 
 @Stateless
@@ -48,8 +48,8 @@ public class BookingService {
 
 		Person person = userService.getUserById(bookingDto.userId);
 
-		if (person.getId() == null)
-			throw new ClientException("Only registered users can create a booking");
+//		if (person.getId() == null)
+//			throw new ClientException("Only registered users can create a booking");
 
 		Adress pickupAdress = new Adress(bookingDto.pickUpStandNumber, bookingDto.pickUpStreetName,
 				bookingDto.pickUpSuburb, bookingDto.pickUpProvince, bookingDto.pickUpPostalCode);
@@ -75,23 +75,26 @@ public class BookingService {
 				while (rs.next()) {
 					if (rs.getString(1).equals(bookingId))
 						bookingId = partyService.randomChars(15);
+					logger.info("================================= " + bookingId);
 				}
+
+				found = false;
+				// con.close();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 
 		Booking booking = new Booking(bookingId, pickupAdress, dropoffAdress, bookingDto.userId, pickUpDetails,
-				dropOffDetails, 0);
+				dropOffDetails, bookingDto.date, 0, "No Driver", BookingStatus.AWAITING_DRIVER);
 
 		try {
-
 			String pickUpAdress = gson.toJson(booking.getPickupAdress());
 			String dropOffAdress = gson.toJson(booking.getDropOffAdress());
 			String pickUpDetail = gson.toJson(booking.getPickupDetails());
 			String dropOffDetail = gson.toJson(booking.getDropOffDetails());
 
-			String query = "insert into bookings(bookingId,pickupAdress,dropOffAdress,userId,pickupDetails,dropOffDetails,price) values(?,?,?,?,?,?,?)";
+			String query = "insert into bookings(bookingId,pickupAdress,dropOffAdress,userId,pickupDetails,dropOffDetails,bookingDate,price,assignedDriver,status) values(?,?,?,?,?,?,?,?,?,?)";
 			PreparedStatement ps = con.prepareStatement(query);
 			ps.setString(1, booking.getBookingId());
 			ps.setString(2, pickUpAdress);
@@ -99,31 +102,49 @@ public class BookingService {
 			ps.setString(4, booking.getUserId());
 			ps.setString(5, pickUpDetail);
 			ps.setString(6, dropOffDetail);
-			ps.setString(7, "" + booking.getPrice());
+			ps.setString(7, booking.getBookingDate());
+			ps.setDouble(8, booking.getPrice());
+			ps.setString(9, booking.getAssinedDriver());
+			ps.setString(10, gson.toJson(booking.getStatus()));
+
+			ps.executeUpdate();
 
 			con.close();
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 		return booking;
 	}
 
 	public Booking getBookingById(String id) {
 		try {
-			String query = "select * from bookings where id=?";
+			String query = "select * from bookings where bookingId=?";
 			PreparedStatement ps = con.prepareStatement(query);
 			ps.setString(1, id);
 			ResultSet rs = ps.executeQuery();
+
 			while (rs.next()) {
-				String booking = rs.getString(2);
-				extractedBooking = gson.fromJson(booking, Booking.class);
+				extractedBooking.setBookingId(rs.getString(1));
+				extractedBooking.setPickupAdress(gson.fromJson(rs.getString(2), Adress.class));
+				extractedBooking.setDropOffAdress(gson.fromJson(rs.getString(3), Adress.class));
+				extractedBooking.setUserId(rs.getString(4));
+				extractedBooking.setPickupDetails(gson.fromJson(rs.getString(5), DropDetails.class));
+				extractedBooking.setDropOffDetails(gson.fromJson(rs.getString(6), DropDetails.class));
+				extractedBooking.setPrice(7);
+
 			}
+
+			if (!rs.next())
+				throw new ClientException("===== Booking does not exist =====");
+
 			con.close();
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		System.out.println(extractedBooking);
 		return extractedBooking;
 	}
 
@@ -227,6 +248,8 @@ public class BookingService {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		System.out.println(bookings);
 		return bookings;
 	}
 

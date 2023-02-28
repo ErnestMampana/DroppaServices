@@ -1,4 +1,4 @@
-package com.droppa.webapi.Droppa.pojo;
+package com.droppa.webapi.DroppaServices.pojo;
 
 import java.sql.Date;
 import java.time.OffsetDateTime;

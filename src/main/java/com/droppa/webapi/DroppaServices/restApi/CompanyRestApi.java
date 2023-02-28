@@ -4,9 +4,9 @@ import java.util.List;
 
 import javax.ejb.EJB;
 
-import com.droppa.webapi.Droppa.DTO.CompanyDTO;
-import com.droppa.webapi.Droppa.pojo.Company;
+import com.droppa.webapi.DroppaServices.DTO.CompanyDTO;
 import com.droppa.webapi.DroppaServices.bean.CompanyService;
+import com.droppa.webapi.DroppaServices.pojo.Company;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;

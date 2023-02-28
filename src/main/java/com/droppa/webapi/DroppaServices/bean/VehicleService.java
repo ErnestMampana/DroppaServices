@@ -9,11 +9,11 @@ import javax.ejb.EJB;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 
-import com.droppa.webapi.Droppa.DTO.VehicleDTO;
-import com.droppa.webapi.Droppa.common.ClientException;
-import com.droppa.webapi.Droppa.common.MySqlConnection;
-import com.droppa.webapi.Droppa.pojo.Company;
-import com.droppa.webapi.Droppa.pojo.Vehicle;
+import com.droppa.webapi.DroppaServices.DTO.VehicleDTO;
+import com.droppa.webapi.DroppaServices.common.ClientException;
+import com.droppa.webapi.DroppaServices.common.MySqlConnection;
+import com.droppa.webapi.DroppaServices.pojo.Company;
+import com.droppa.webapi.DroppaServices.pojo.Vehicle;
 import com.google.gson.Gson;
 
 @Stateless

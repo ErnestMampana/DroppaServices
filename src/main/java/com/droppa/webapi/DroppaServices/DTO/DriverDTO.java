@@ -1,4 +1,4 @@
-package com.droppa.webapi.Droppa.DTO;
+package com.droppa.webapi.DroppaServices.DTO;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;

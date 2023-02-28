@@ -1,19 +1,21 @@
 package com.droppa.webapi.DroppaServices.core;
 
 public enum AccountStatus {
-	
-	//Account status
-	ACTIVE("Active"),
-    SUSPENDED("Suspended"),
-    AWAITING_CONFIRMATION("Awaiting Confirmation"),
-    AWAITING_PWD_RESET("Awaiting Password Reset"),
-    DELETED("Deleted");
 
-	  private String description;
+	// Account status
+	ACTIVE("Active"), 
+	SUSPENDED("Suspended"), 
+	AWAITING_CONFIRMATION("Awaiting Confirmation"),
+	AWAITING_PWD_RESET("Awaiting Password Reset"), 
+	DELETED("Deleted");
 
-	    AccountStatus(String description) {
-	        this.description = description;
-	    }
+	private String description;
 
-	    public String description() { return description; }
+	AccountStatus(String description) {
+		this.description = description;
+	}
+
+	public String description() {
+		return description;
+	}
 }

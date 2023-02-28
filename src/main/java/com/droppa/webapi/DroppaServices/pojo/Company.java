@@ -1,4 +1,4 @@
-package com.droppa.webapi.Droppa.pojo;
+package com.droppa.webapi.DroppaServices.pojo;
 
 import java.util.List;
 

@@ -4,11 +4,12 @@ import java.util.List;
 
 import javax.ejb.EJB;
 
-import com.droppa.webapi.Droppa.DTO.DriverDTO;
-import com.droppa.webapi.Droppa.pojo.DriverAccount;
-import com.droppa.webapi.Droppa.pojo.Person;
-import com.droppa.webapi.Droppa.pojo.VehicleDriver;
+import com.droppa.webapi.DroppaServices.DTO.DriverDTO;
 import com.droppa.webapi.DroppaServices.bean.DriverService;
+import com.droppa.webapi.DroppaServices.pojo.DriverAccount;
+import com.droppa.webapi.DroppaServices.pojo.Person;
+import com.droppa.webapi.DroppaServices.pojo.VehicleDriver;
+
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;

@@ -9,12 +9,12 @@ import java.util.logging.Logger;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 
-import com.droppa.webapi.Droppa.DTO.PersonDTO;
-import com.droppa.webapi.Droppa.common.ClientException;
-import com.droppa.webapi.Droppa.common.MySqlConnection;
-import com.droppa.webapi.Droppa.pojo.Person;
-import com.droppa.webapi.Droppa.pojo.UserAccount;
+import com.droppa.webapi.DroppaServices.DTO.PersonDTO;
+import com.droppa.webapi.DroppaServices.common.ClientException;
+import com.droppa.webapi.DroppaServices.common.MySqlConnection;
 import com.droppa.webapi.DroppaServices.core.AccountStatus;
+import com.droppa.webapi.DroppaServices.pojo.Person;
+import com.droppa.webapi.DroppaServices.pojo.UserAccount;
 import com.google.gson.Gson;
 
 @Stateless
@@ -48,7 +48,7 @@ public class UserService {
 				acc.setOwner(gson.fromJson(pers, Person.class));
 				acc.setOtp(rs.getInt(4));
 				acc.setConfirmed(rs.getBoolean(3));
-				acc.setStatus(rs.getString(5));
+				acc.setStatus(gson.fromJson(rs.getString(5), AccountStatus.class));
 				users.add(acc);
 			}
 			con.close();
@@ -61,6 +61,7 @@ public class UserService {
 	public PersonDTO createUserAccount(PersonDTO person) {
 
 		String owner = gson.toJson(person);
+		String status = gson.toJson(AccountStatus.AWAITING_CONFIRMATION);
 
 		try {
 			String check = "select * from users";
@@ -70,9 +71,7 @@ public class UserService {
 			while (rs.next()) {
 				String pers = rs.getString(2);
 				extractedPerson = gson.fromJson(pers, Person.class);
-				if (rs.getString(1).equals(person.id)) {
-					throw new ClientException("User with id '" + person.id + "' already exist.");
-				}
+
 				if (extractedPerson.getEmail().equals(person.email)) {
 					throw new ClientException("Email " + person.email + " is already in use.");
 				}
@@ -82,13 +81,15 @@ public class UserService {
 
 			}
 			// save useraccount
-			String query = "insert into users(id,AccountOwner,IsConfirmed,Otp,Statuses) values(?,?,?,?,?)";
+			String query = "insert into users(username,AccountOwner,IsConfirmed,Otp,Password,Status,Token) values(?,?,?,?,?,?,?)";
 			PreparedStatement ps = con.prepareStatement(query);
-			ps.setString(1, person.id);
+			ps.setString(1, person.email);
 			ps.setString(2, owner);
 			ps.setBoolean(3, false);
 			ps.setInt(4, partyService.generateOTP(person.celphone));
-			ps.setString(5, AccountStatus.AWAITING_CONFIRMATION.toString());
+			ps.setString(5, person.password);
+			ps.setString(6, status);
+			ps.setString(7, partyService.generateToken());
 			ps.executeUpdate();
 
 			con.close();
@@ -98,17 +99,21 @@ public class UserService {
 		return person;
 	}
 
-	public Person getUserById(String id) {
+	public Person getUserById(String email) {
 		try {
-			String query = "select * from users where id=?";
+			String query = "select * from users where username=?";
 			PreparedStatement ps = con.prepareStatement(query);
-			ps.setString(1, id);
+			ps.setString(1, email);
 			ResultSet rs = ps.executeQuery();
-			while (rs.next()) {
-				String pers = rs.getString(2);
-				extractedPerson = gson.fromJson(pers, Person.class);
-			}
-			con.close();
+
+			if (!rs.next())
+				throw new ClientException("User " + "'" + email + "'" + " does not exist");
+
+			String pers = rs.getString(2);
+			extractedPerson = gson.fromJson(pers, Person.class);
+
+			// con.close();
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -117,7 +122,10 @@ public class UserService {
 	}
 
 	public String confirmMobile(String celphone, int otp) {
+
 		String message = "user not found";
+		String status = gson.toJson(AccountStatus.ACTIVE);
+
 		try {
 
 			String check = "select * from users";
@@ -134,68 +142,76 @@ public class UserService {
 						logger.info(message);
 						throw new ClientException(message);
 					}
-					System.out.println("================== " + rs.getInt(4));
 					if (rs.getInt(4) == otp) {
-						String query = "update users set IsConfirmed=?,statuses=? where statuses=?";
+						String query = "update users set IsConfirmed=?,status=? where username=?";
 						PreparedStatement pt = this.con.prepareStatement(query);
 
 						pt.setBoolean(1, true);
-						pt.setString(2, AccountStatus.ACTIVE.toString());
-						pt.setString(3, AccountStatus.AWAITING_CONFIRMATION.toString());
+						pt.setString(2, status);
+						pt.setString(3, rs.getString(1));
 
 						pt.executeUpdate();
 						message = "User Account Activated";
 						con.close();
+					} else {
+						message = "invalid OTP";
+						throw new ClientException("invalid OTP");
 					}
 
 				}
 
 			}
-			logger.info("=============================== User not found");
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		logger.info("=============================== " + message);
 		return message;
 	}
 
 	public String confirmEmail(String email, int otp) {
-		String message = "user not found";
-		try {
 
-			String check = "select * from users";
+		String message = "User " + "'" + email + "'" + " was not found";
+		String status = gson.toJson(AccountStatus.ACTIVE);
+
+		try {
+			String check = "select * from users where username=?";
 			PreparedStatement psc = con.prepareStatement(check);
+			psc.setString(1, email);
 			ResultSet rs = psc.executeQuery();
 
 			while (rs.next()) {
-				String pers = rs.getString(2);
-				extractedPerson = gson.fromJson(pers, Person.class);
 
-				if (extractedPerson.getEmail().equals(email)) {
-					if (rs.getBoolean(3)) {
-						message = "Account already activated";
-						logger.info("Account already activated");
-						throw new ClientException("Account already activated");
-					}
-					if (rs.getInt(4) == otp) {
-						String query = "update users set IsConfirmed=?,statuses=? where statuses=?";
-						PreparedStatement pt = con.prepareStatement(query);
+				if (rs.getBoolean(3)) {
+					message = "Account already activated";
+					logger.info(message);
+					throw new ClientException(message);
+				}
+				if (rs.getInt(4) == otp) {
+					String query = "update users set IsConfirmed=?,status=? where username=?";
+					PreparedStatement pt = this.con.prepareStatement(query);
 
-						pt.setBoolean(1, true);
-						pt.setString(2, AccountStatus.ACTIVE.toString());
-						pt.setString(3, AccountStatus.AWAITING_CONFIRMATION.toString());
+					pt.setBoolean(1, true);
+					pt.setString(2, status);
+					pt.setString(3, email);
 
-						pt.executeUpdate();
-						message = "User Account Activated";
-						con.close();
-					}
-
+					pt.executeUpdate();
+					message = "User Account Activated";
+					con.close();
+				} else {
+					message = "invalid OTP";
+					throw new ClientException("invalid OTP");
 				}
 
 			}
-			logger.info("=============================== User not found");
+
+			if (!rs.next())
+				throw new ClientException(message);
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		logger.info("=============================== : " + message);
 		return message;
 	}
 

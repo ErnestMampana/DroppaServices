@@ -3,10 +3,12 @@ package com.droppa.webapi.DroppaServices.restApi;
 import java.util.List;
 import javax.ejb.EJB;
 
-import com.droppa.webapi.Droppa.DTO.PersonDTO;
-import com.droppa.webapi.Droppa.pojo.Person;
-import com.droppa.webapi.Droppa.pojo.UserAccount;
+import com.droppa.webapi.DroppaServices.Auth.Secured;
+import com.droppa.webapi.DroppaServices.DTO.PersonDTO;
 import com.droppa.webapi.DroppaServices.bean.UserService;
+import com.droppa.webapi.DroppaServices.pojo.Person;
+import com.droppa.webapi.DroppaServices.pojo.UserAccount;
+
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -26,6 +28,7 @@ public class UserRestApi {
 //		return userService.createUserAccount(null);
 //	}
 
+	@Secured
 	@GET
 	@Path("/viewallusers")
 	public Response getAllUsers() {

@@ -1,4 +1,4 @@
-package com.droppa.webapi.Droppa.DTO;
+package com.droppa.webapi.DroppaServices.DTO;
 
 public class BookingDTO {
 	public String userId;
@@ -17,9 +17,11 @@ public class BookingDTO {
 	
 	public String pickUpName;
 	public String pickUpSurname;
-	public long pickUpContact;
+	public String pickUpContact;
 	
 	public String dropOffName;
 	public String dropOffSurname;
-	public long dropOffContact;
+	public String dropOffContact;
+	
+	public String date;
 }
