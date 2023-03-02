@@ -17,5 +17,7 @@ public class DriverDTO {
 	public long celphone;
 
 	public String companyId;
+	
+	public String vehicleId;
 
 }

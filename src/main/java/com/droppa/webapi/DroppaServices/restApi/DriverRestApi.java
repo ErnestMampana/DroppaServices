@@ -14,6 +14,7 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -39,5 +40,12 @@ public class DriverRestApi {
 	public Response createUser(DriverDTO driver) {
 		driverService.createDriverAccount(driver);
 		return Response.ok().entity(driver).build();
+	}
+	
+	@GET
+	@Path("/getdriverbyid/{driverId}")
+	public Response getDriverById(@PathParam("driverId") String driverId) {
+		DriverAccount driverAcc = driverService.getDriverById(driverId);
+		return Response.ok().entity(driverAcc).build();
 	}
 }

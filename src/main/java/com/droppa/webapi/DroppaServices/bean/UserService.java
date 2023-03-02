@@ -3,6 +3,7 @@ package com.droppa.webapi.DroppaServices.bean;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -30,6 +31,7 @@ public class UserService {
 	Connection con = MySqlConnection.getConnection();
 	Person extractedPerson = new Person();
 	ArrayList<UserAccount> users = new ArrayList<>();
+	UserAccount extractedAccount = new UserAccount();
 
 	public UserService() {
 		super();
@@ -99,7 +101,7 @@ public class UserService {
 		return person;
 	}
 
-	public Person getUserById(String email) {
+	public UserAccount getUserById(String email) {
 		try {
 			String query = "select * from users where username=?";
 			PreparedStatement ps = con.prepareStatement(query);
@@ -109,8 +111,10 @@ public class UserService {
 			if (!rs.next())
 				throw new ClientException("User " + "'" + email + "'" + " does not exist");
 
-			String pers = rs.getString(2);
-			extractedPerson = gson.fromJson(pers, Person.class);
+			extractedAccount.setId(rs.getString(1));
+			extractedAccount.setOwner(gson.fromJson(rs.getString(2), Person.class));
+			extractedAccount.setConfirmed(rs.getBoolean(3));
+			extractedAccount.setStatus(gson.fromJson(rs.getString(6), AccountStatus.class));
 
 			// con.close();
 
@@ -118,7 +122,7 @@ public class UserService {
 			e.printStackTrace();
 		}
 
-		return extractedPerson;
+		return extractedAccount;
 	}
 
 	public String confirmMobile(String celphone, int otp) {
@@ -213,6 +217,109 @@ public class UserService {
 		}
 		logger.info("=============================== : " + message);
 		return message;
+	}
+
+	public int requestPasswordReset(String username) {
+		int otp = 0;
+		try {
+			UserAccount userAccount = getUserById(username);
+
+			if (userAccount.getId().equals(username)) {
+
+				otp = partyService.generateOTP(userAccount.getOwner().getCelphone());
+
+				String query = "update users set isConfirmed=?,otp=?,status=? where username=?";
+				PreparedStatement ps = con.prepareStatement(query);
+				ps.setBoolean(1, false);
+				ps.setInt(2, otp);
+				ps.setString(3, gson.toJson(AccountStatus.AWAITING_PWD_RESET));
+				ps.setString(4, username);
+
+				ps.executeUpdate();
+
+				con.close();
+
+			} else {
+				throw new ClientException("User not found");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return otp;
+	}
+
+	public UserAccount resetPassword(int otp, String username) {
+		UserAccount userAcc = getUserById(username);
+		try {
+			if (userAcc.getStatus().equals(AccountStatus.AWAITING_PWD_RESET)) {
+				if (getUserOtp(username) == otp) {
+
+					String query = "update users set status=? where username=?";
+					PreparedStatement ps = con.prepareStatement(query);
+					ps.setString(1, gson.toJson(AccountStatus.ACTIVE));
+					ps.setString(2, username);
+					ps.executeUpdate();
+					extractedAccount = getUserById(username);
+					extractedAccount = autoUserLogin(username);
+
+				} else {
+					throw new ClientException("Invalid OTP");
+				}
+
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return extractedAccount;
+	}
+
+	public int getUserOtp(String username) {
+
+		int otp = 0;
+
+		try {
+			String query = "select otp from users where username=?";
+			PreparedStatement ps = con.prepareStatement(query);
+			ps.setString(1, username);
+			ResultSet rs = ps.executeQuery();
+			while (rs.next()) {
+				otp = rs.getInt(1);
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return otp;
+	}
+
+	public UserAccount userLogin(String username, String password) {
+
+		users = (ArrayList<UserAccount>) getAllUsers();
+		for (int i = 0; i <= users.size() - 1; i++) {
+			if (users.get(i).getId().equals(username) && users.get(i).getPassword().equals(password)) {
+				extractedAccount.setId(users.get(i).getId());
+				extractedAccount.setOwner(users.get(i).getOwner());
+			} else {
+				throw new ClientException("invalid username and password");
+			}
+		}
+		return extractedAccount;
+	}
+
+	public UserAccount autoUserLogin(String username) {
+
+		users = (ArrayList<UserAccount>) getAllUsers();
+		for (int i = 0; i <= users.size() - 1; i++) {
+			if (users.get(i).getId().equals(username)) {
+				extractedAccount.setId(users.get(i).getId());
+				extractedAccount.setOwner(users.get(i).getOwner());
+			} else {
+				throw new ClientException("Auto login failed");
+			}
+		}
+		return extractedAccount;
 	}
 
 }

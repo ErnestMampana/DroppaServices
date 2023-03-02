@@ -31,12 +31,12 @@ public class CompanyRestApi {
 		return Response.ok().entity(company).build();
 	}
 	
-	@GET
-	@Path("/getcompany/{id}")
-	public Response getCompanyById(@PathParam("id") String id) {
-		Company company = companyService.getCompanyById(id);
-		return Response.ok().entity(company).build();
-	}
+//	@GET
+//	@Path("/getcompany/{id}")
+//	public Response getCompanyById(@PathParam("id") String id) {
+//		Company company = companyService.getCompanyById(id);
+//		return Response.ok().entity(company).build();
+//	}
 	
 	@GET
 	@Path("/viewallcompanies")

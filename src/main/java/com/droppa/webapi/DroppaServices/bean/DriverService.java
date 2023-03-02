@@ -20,20 +20,27 @@ import com.droppa.webapi.DroppaServices.pojo.Vehicle;
 import com.droppa.webapi.DroppaServices.pojo.VehicleDriver;
 import com.google.gson.Gson;
 
-
-
 @Stateless
 @Local
 public class DriverService {
 	Gson gson = new Gson();
-	private VehicleDriver extractedPerson = new VehicleDriver();
+
+	private VehicleDriver extractedDriver = new VehicleDriver();
+
 	private ArrayList<DriverAccount> drivers = new ArrayList<>();
+
+	private DriverAccount driverAccount = new DriverAccount();
+
 	private static final Logger logger = Logger.getLogger(DriverService.class.getName());
+
 	private Connection con = MySqlConnection.getConnection();
+
 	@EJB
 	CompanyService companyService = new CompanyService();
-	
-	
+
+	@EJB
+	private VehicleService vehicleService = new VehicleService();
+
 	public VehicleDriver createDriverAccount(DriverDTO driver) {
 		VehicleDriver vDriver = new VehicleDriver();
 		vDriver.setId(driver.id);
@@ -44,23 +51,18 @@ public class DriverService {
 		vDriver.setVehicles(null);
 
 		Company company = companyService.getCompanyById(driver.companyId);	
-		Vehicle vehicleData = new Vehicle("FPG151GP", "TOYOTA", "CONQUEST", "20/12/2023", null, company);
+		Vehicle vehicleData = vehicleService.getVehicleByRegistration(driver.vehicleId);
 		
 		String vdriver = gson.toJson(vDriver);
 		String vehicle = gson.toJson(vehicleData);
 
 		try {
-			String check = "select * from drivers";
-			PreparedStatement psc = con.prepareStatement(check);
-			ResultSet rs = psc.executeQuery();
-
-			while (rs.next()) {
-				String drive = rs.getString(2);
-				extractedPerson = gson.fromJson(drive, VehicleDriver.class);
-				if (extractedPerson.getId().equals(driver.id)) {
+			
+			List<DriverAccount> drivers = getAllDrivers();
+			for(int i = 0; i <= drivers.size(); i++) {
+				if(drivers.get(i).getId().equals(driver.id)) 
 					throw new ClientException("This driver is already registred by a different company.");
-				}
-
+							
 			}
 			// save driver account
 			String query = "insert into drivers(id,VehicleDriver,Vehicle,status) values(?,?,?,?)";
@@ -68,7 +70,7 @@ public class DriverService {
 			ps.setString(1, driver.id);
 			ps.setString(2, vdriver);
 			ps.setString(3, vehicle);
-			ps.setString(4, AccountStatus.AWAITING_CONFIRMATION.toString());
+			ps.setString(4, gson.toJson(AccountStatus.AWAITING_CONFIRMATION));
 			ps.executeUpdate();
 			
 			con.close();
@@ -77,7 +79,7 @@ public class DriverService {
 		}
 		return vDriver;
 	}
-	
+
 	public List<DriverAccount> getAllDrivers() {
 
 		try {
@@ -99,6 +101,30 @@ public class DriverService {
 			e.printStackTrace();
 		}
 		return drivers;
+	}
+
+	public DriverAccount getDriverById(String driverId) {
+
+		try {
+			String query = "select * from drivers where Id=?";
+			PreparedStatement ps = con.prepareStatement(query);
+			ps.setString(1, driverId);
+			ResultSet rs = ps.executeQuery();
+
+			if (!rs.next())
+				throw new ClientException("Driver not found");
+
+			driverAccount.setId(rs.getString(1));
+			driverAccount.setDriver(gson.fromJson(rs.getString(2), VehicleDriver.class));
+			driverAccount.setVehicle(gson.fromJson(rs.getString(3), Vehicle.class));
+			driverAccount.setStatus(rs.getString(4));
+
+			con.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return driverAccount;
 	}
 
 }

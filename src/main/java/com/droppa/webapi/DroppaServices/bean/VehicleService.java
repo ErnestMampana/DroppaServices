@@ -12,7 +12,11 @@ import javax.ejb.Stateless;
 import com.droppa.webapi.DroppaServices.DTO.VehicleDTO;
 import com.droppa.webapi.DroppaServices.common.ClientException;
 import com.droppa.webapi.DroppaServices.common.MySqlConnection;
+import com.droppa.webapi.DroppaServices.core.BookingStatus;
+import com.droppa.webapi.DroppaServices.pojo.Adress;
+import com.droppa.webapi.DroppaServices.pojo.Booking;
 import com.droppa.webapi.DroppaServices.pojo.Company;
+
 import com.droppa.webapi.DroppaServices.pojo.Vehicle;
 import com.google.gson.Gson;
 
@@ -22,8 +26,9 @@ public class VehicleService {
 	Connection con = MySqlConnection.getConnection();
 	Gson gson = new Gson();
 	ArrayList<Vehicle> vehicles = new ArrayList<>();
+	Vehicle extractedVehicle = new Vehicle();
 	@EJB
-	CompanyService companyService = new CompanyService();
+	private CompanyService companyService = new CompanyService();
 
 	public Vehicle registerVehicle(VehicleDTO vehicleDto) {
 
@@ -36,18 +41,14 @@ public class VehicleService {
 		Company extractedCompany = new Company();
 
 		try {
-			String check = "select * from vehicles";
-			PreparedStatement psc = con.prepareStatement(check);
-			ResultSet rs = psc.executeQuery();
-
-			while (rs.next()) {
-				String pers = rs.getString(6);
-				extractedCompany = gson.fromJson(pers, Company.class);
-				if (rs.getString(1).equals(vehicle.getRegistration())) {
+			
+			vehicles = (ArrayList<Vehicle>) getAllVehicles();
+			for(int i = 0; i <= vehicles.size(); i++) {
+				if(vehicles.get(i).getRegistration().equals(vehicle.getRegistration()))
 					throw new ClientException("This vehicle has been registered by "
 							+ vehicle.getCompany().getCompanyName() + " already");
-				}
 			}
+	
 			// save vehicle data
 			String query = "insert into vehicles(Registration,Make,VehicleType,DiscExpiryDate,Drivers,Company) values(?,?,?,?,?,?)";
 			PreparedStatement ps = con.prepareStatement(query);
@@ -88,5 +89,31 @@ public class VehicleService {
 			e.printStackTrace();
 		}
 		return vehicles;
+	}
+
+	public Vehicle getVehicleByRegistration(String vehicleId) {
+		try {
+			String query = "select * from vehicles where Registration=?";
+			PreparedStatement ps = con.prepareStatement(query);
+			ps.setString(1,vehicleId);
+			ResultSet rs = ps.executeQuery();
+
+			if (!rs.next())
+				throw new ClientException("===== Booking does not exist =====");
+
+			extractedVehicle.setRegistration(rs.getString(1));
+			extractedVehicle.setMake(rs.getString(2));
+			extractedVehicle.setType(rs.getString(3));
+			extractedVehicle.setDiscExpiryDate(rs.getString(4));
+			extractedVehicle.setDrivers(null);
+			extractedVehicle.setCompany(gson.fromJson(rs.getString(6), Company.class));
+			
+
+			//con.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return extractedVehicle;
 	}
 }

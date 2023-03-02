@@ -1,7 +1,6 @@
 package com.droppa.webapi.DroppaServices.pojo;
 
-import java.sql.Date;
-import java.time.OffsetDateTime;
+
 import java.util.List;
 
 import jakarta.validation.constraints.NotNull;

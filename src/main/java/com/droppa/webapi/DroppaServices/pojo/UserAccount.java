@@ -12,24 +12,41 @@ public class UserAccount {
 	private boolean confirmed;
 	private int otp;
 	private AccountStatus status;
+	private String password;
+	private String token;
 
 	public UserAccount() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
 
-
-
-	public UserAccount(@NotNull String id, Person owner, boolean confirmed, int otp, AccountStatus status) {
+	public UserAccount(@NotNull String id, Person owner, boolean confirmed, int otp, AccountStatus status,
+			String password, String token) {
 		super();
 		this.id = id;
 		this.owner = owner;
 		this.confirmed = confirmed;
 		this.otp = otp;
 		this.status = status;
+		this.password = password;
+		this.token = token;
 	}
 
+	public String getPassword() {
+		return password;
+	}
 
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
 
 	public String getId() {
 		return id;

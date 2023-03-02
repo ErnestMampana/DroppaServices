@@ -30,15 +30,15 @@ public class CompanyService {
 	private Company extractedCompany = new Company();
 	private ArrayList<Company> companies = new ArrayList<>();
 	private static final Logger logger = Logger.getLogger(CompanyService.class.getName());
-	@EJB
-	UserService userService = new UserService();
+	@EJB private UserService userService = new UserService();	
+	@EJB private PartyService partyService = new PartyService();
 	
 	public Company createCompany(CompanyDTO companyDTO) {
-		Person person = userService.getUserById(companyDTO.ownerId);
+		Person person = userService.getUserById(companyDTO.ownerId).getOwner();
 		Company company = new Company();
 		company.setCompanyName(companyDTO.companyName);
 		company.setLocation(companyDTO.location);
-		company.setId(companyDTO.ownerId);
+		company.setId(partyService.randomChars(10));
 		company.setOwner(person);
 		company.setDrivers(null);
 		company.setListOfVehicles(null);
@@ -63,7 +63,7 @@ public class CompanyService {
 			// save company details
 			String query = "insert into companies(id,companyName,companyOwner,companyDrivers,companyVehicles,location) values(?,?,?,?,?,?)";
 			PreparedStatement ps = this.con.prepareStatement(query);
-			ps.setString(1, company.getOwner().getId());
+			ps.setString(1, company.getId() );
 			ps.setString(2, company.getCompanyName());
 			ps.setString(3, owner);
 			ps.setString(4, drivers);

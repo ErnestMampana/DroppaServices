@@ -17,7 +17,6 @@ import com.droppa.webapi.DroppaServices.core.BookingStatus;
 import com.droppa.webapi.DroppaServices.pojo.Adress;
 import com.droppa.webapi.DroppaServices.pojo.Booking;
 import com.droppa.webapi.DroppaServices.pojo.DropDetails;
-import com.droppa.webapi.DroppaServices.pojo.Person;
 import com.google.gson.Gson;
 
 @Stateless
@@ -46,7 +45,7 @@ public class BookingService {
 
 		String bookingId;
 
-		Person person = userService.getUserById(bookingDto.userId);
+		//Person person = userService.getUserById(bookingDto.userId).getOwner();
 
 //		if (person.getId() == null)
 //			throw new ClientException("Only registered users can create a booking");
@@ -125,26 +124,26 @@ public class BookingService {
 			ps.setString(1, id);
 			ResultSet rs = ps.executeQuery();
 
-			while (rs.next()) {
-				extractedBooking.setBookingId(rs.getString(1));
-				extractedBooking.setPickupAdress(gson.fromJson(rs.getString(2), Adress.class));
-				extractedBooking.setDropOffAdress(gson.fromJson(rs.getString(3), Adress.class));
-				extractedBooking.setUserId(rs.getString(4));
-				extractedBooking.setPickupDetails(gson.fromJson(rs.getString(5), DropDetails.class));
-				extractedBooking.setDropOffDetails(gson.fromJson(rs.getString(6), DropDetails.class));
-				extractedBooking.setPrice(7);
-
-			}
-
 			if (!rs.next())
 				throw new ClientException("===== Booking does not exist =====");
 
-			con.close();
+			extractedBooking.setBookingId(rs.getString(1));
+			extractedBooking.setPickupAdress(gson.fromJson(rs.getString(2), Adress.class));
+			extractedBooking.setDropOffAdress(gson.fromJson(rs.getString(3), Adress.class));
+			extractedBooking.setUserId(rs.getString(4));
+			extractedBooking.setPickupDetails(gson.fromJson(rs.getString(5), DropDetails.class));
+			extractedBooking.setDropOffDetails(gson.fromJson(rs.getString(6), DropDetails.class));
+			extractedBooking.setBookingDate(rs.getString(7));
+			extractedBooking.setPrice(8);
+			extractedBooking.setAssinedDriver(rs.getString(9));
+			extractedBooking.setStatus(gson.fromJson(rs.getString(10), BookingStatus.class));
+
+			//con.close();
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println(extractedBooking);
+
 		return extractedBooking;
 	}
 
@@ -225,20 +224,17 @@ public class BookingService {
 			ResultSet rs = ps.executeQuery();
 
 			while (rs.next()) {
-				String pickUpAdress = rs.getString(2);
-				String dropOffAdress = rs.getString(3);
-				String pickUpDetails = rs.getString(5);
-				String dropOffDetails = rs.getString(6);
-
 				Booking book = new Booking();
-
 				book.setBookingId(rs.getString(1));
-				book.setPickupAdress(gson.fromJson(pickUpAdress, Adress.class));
-				book.setDropOffAdress(gson.fromJson(dropOffAdress, Adress.class));
+				book.setPickupAdress(gson.fromJson(rs.getString(2), Adress.class));
+				book.setDropOffAdress(gson.fromJson(rs.getString(3), Adress.class));
 				book.setUserId(rs.getString(4));
-				book.setPickupDetails(gson.fromJson(pickUpDetails, DropDetails.class));
-				book.setDropOffDetails(gson.fromJson(dropOffDetails, DropDetails.class));
-				book.setPrice(Double.parseDouble(rs.getString(7)));
+				book.setPickupDetails(gson.fromJson(rs.getString(5), DropDetails.class));
+				book.setDropOffDetails(gson.fromJson(rs.getString(6), DropDetails.class));
+				book.setBookingDate(rs.getString(7));
+				book.setPrice(8);
+				book.setAssinedDriver(rs.getString(9));
+				book.setStatus(gson.fromJson(rs.getString(10), BookingStatus.class));
 
 				bookings.add(book);
 			}
@@ -250,6 +246,102 @@ public class BookingService {
 		}
 
 		System.out.println(bookings);
+		return bookings;
+	}
+
+	public List<Booking> getBookingsByDriverId(String driverId) {
+		try {
+			String query = "select * from bookings where assignedDriver=?";
+			PreparedStatement psc = con.prepareStatement(query);
+			psc.setString(1, driverId);
+			ResultSet rs = psc.executeQuery();
+
+			while (rs.next()) {
+				Booking book = new Booking();
+				book.setBookingId(rs.getString(1));
+				book.setPickupAdress(gson.fromJson(rs.getString(2), Adress.class));
+				book.setDropOffAdress(gson.fromJson(rs.getString(3), Adress.class));
+				book.setUserId(rs.getString(4));
+				book.setPickupDetails(gson.fromJson(rs.getString(5), DropDetails.class));
+				book.setDropOffDetails(gson.fromJson(rs.getString(6), DropDetails.class));
+				book.setBookingDate(rs.getString(7));
+				book.setPrice(8);
+				book.setAssinedDriver(rs.getString(9));
+				book.setStatus(gson.fromJson(rs.getString(10), BookingStatus.class));
+
+				bookings.add(book);
+
+			}
+
+			if (bookings.isEmpty())
+				throw new ClientException("no bookings found");
+
+			con.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return bookings;
+	}
+	
+	
+	public Booking cancelBooking(String bookingId,String userId) {
+		
+		Booking booking = getBookingById(bookingId);
+		
+		if(booking.getBookingId() != null && booking.getStatus() != BookingStatus.CANCELLED && booking.getUserId().equals(userId)) {
+			try {
+				String update = "update bookings set status=? where bookingId=?";
+				PreparedStatement ps = con.prepareStatement(update);
+				ps.setString(1, gson.toJson(BookingStatus.CANCELLED));
+				ps.setString(2, bookingId);
+				ps.executeUpdate();
+				
+				con.close();
+				
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+			
+		return extractedBooking;
+	}
+	
+	
+	public List<Booking> getBookingsByUserId(String userId) {
+		try {
+			String query = "select * from bookings where userId=?";
+			PreparedStatement psc = con.prepareStatement(query);
+			psc.setString(1, userId);
+			ResultSet rs = psc.executeQuery();
+
+			while (rs.next()) {
+				Booking book = new Booking();
+				book.setBookingId(rs.getString(1));
+				book.setPickupAdress(gson.fromJson(rs.getString(2), Adress.class));
+				book.setDropOffAdress(gson.fromJson(rs.getString(3), Adress.class));
+				book.setUserId(rs.getString(4));
+				book.setPickupDetails(gson.fromJson(rs.getString(5), DropDetails.class));
+				book.setDropOffDetails(gson.fromJson(rs.getString(6), DropDetails.class));
+				book.setBookingDate(rs.getString(7));
+				book.setPrice(8);
+				book.setAssinedDriver(rs.getString(9));
+				book.setStatus(gson.fromJson(rs.getString(10), BookingStatus.class));
+
+				bookings.add(book);
+
+			}
+
+			if (bookings.isEmpty())
+				throw new ClientException("no bookings found");
+
+			con.close();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		return bookings;
 	}
 
