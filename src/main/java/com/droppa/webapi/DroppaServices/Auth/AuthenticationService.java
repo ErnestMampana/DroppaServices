@@ -3,15 +3,20 @@ package com.droppa.webapi.DroppaServices.Auth;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+
+import javax.ejb.EJB;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
+
+import com.droppa.webapi.DroppaServices.bean.UserService;
 import com.droppa.webapi.DroppaServices.common.MySqlConnection;
 
 
 @Local
 @Stateless
 public class AuthenticationService {
-	
+	@EJB
+	private UserService userService = new UserService();
 	Connection con = MySqlConnection.getConnection();
 	String extractedToken = "";
 
@@ -35,6 +40,7 @@ public class AuthenticationService {
 	}
 	
 	public String extractedToken() {
+		
 		return extractedToken;
 	}
 

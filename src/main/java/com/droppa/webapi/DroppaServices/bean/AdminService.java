@@ -63,29 +63,27 @@ public class AdminService {
 
 	public String confirmDriver(String driverId) {
 		String message = "Driver not found";
+
+		DriverAccount driver = driverService.getDriverById(driverId);
+
+		if (driver.getStatus() != AccountStatus.AWAITING_CONFIRMATION && driver.getStatus() != AccountStatus.SUSPENDED)
+			throw new ClientException("Driver is already confirmed");
 		try {
-			String query = "select * from drivers where id=?";
-			PreparedStatement ps = con.prepareStatement(query);
-			ps.setString(1, driverId);
-			ResultSet rs = ps.executeQuery();
 
-			while (rs.next()) {
-				if (gson.fromJson(rs.getString(4), AccountStatus.class) != AccountStatus.AWAITING_CONFIRMATION
-						&& gson.fromJson(rs.getString(4), AccountStatus.class) != AccountStatus.SUSPENDED)
-					throw new ClientException("Driver is already confirmed");
-				String update = "update drivers set status=? where id=?";
-				PreparedStatement psu = con.prepareStatement(update);
-				psu.setString(1, gson.toJson(AccountStatus.ACTIVE));
-				psu.setString(2, driverId);
-				psu.executeUpdate();
-				message = "Driver Activated";
-				con.close();
-			}
+			String update = "update drivers set status=? where id=?";
+			PreparedStatement psu = con.prepareStatement(update);
+			psu.setString(1, gson.toJson(AccountStatus.ACTIVE));
+			psu.setString(2, driverId);
+			psu.executeUpdate();
+			message = "Driver Activated";
+			con.close();
 
-			if (!rs.next())
+			if (driver.getId() == null)
 				throw new ClientException(message);
 
-		} catch (Exception e) {
+		} catch (
+
+		Exception e) {
 			e.printStackTrace();
 		}
 
@@ -125,12 +123,14 @@ public class AdminService {
 
 		if (userAcc.getId() == null)
 			throw new ClientException(message);
-		try {
 
-			if (userAcc.getStatus() == AccountStatus.SUSPENDED) {
-				message = "User " + userAcc.getId() + " is already suspended";
-				throw new ClientException("User " + userAcc.getId() + " is already suspended");
-			}
+		if (userAcc.getStatus() == AccountStatus.SUSPENDED) {
+			message = "User " + userAcc.getId() + " is already suspended";
+			throw new ClientException("User " + userAcc.getId() + " is already suspended");
+		}
+		if (userAcc.getStatus().equals(AccountStatus.AWAITING_CONFIRMATION))
+			throw new ClientException("User '" + userAcc.getId() + "' not avtivated");
+		try {
 
 			String update = "update users set status=? where username=?";
 			PreparedStatement psu = con.prepareStatement(update);

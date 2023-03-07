@@ -27,7 +27,7 @@ import jakarta.ws.rs.ext.Provider;
 @Provider
 @Priority(Priorities.AUTHENTICATION)
 public class AuthenticationFilter implements ContainerRequestFilter {
-	
+
 	@EJB
 	AdminService adminService = new AdminService();
 
@@ -48,9 +48,8 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
 		// Extract the token from the Authorization header
 		String token = authorizationHeader.substring("Bearer".length()).trim();
-
 		if (token.contains(":")) {
-			
+
 			try {
 				validateToken(token);
 			} catch (Exception e) {
@@ -63,9 +62,10 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 //			setSecurityContext(context, username);
 		}
 	}
-	
+
 	private void validateToken(String key) throws Exception {
-        boolean valid = adminService.validateToken(key);
-        if (!valid) throw new ClientException("Authentication failure");
-    }
+		boolean valid = adminService.validateToken(key);
+		if (!valid)
+			throw new ClientException("Authentication failure");
+	}
 }

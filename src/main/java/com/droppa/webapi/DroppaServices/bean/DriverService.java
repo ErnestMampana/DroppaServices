@@ -93,7 +93,7 @@ public class DriverService {
 				acc.setId(rs.getString(1));
 				acc.setDriver(gson.fromJson(driver, VehicleDriver.class));
 				acc.setVehicle(gson.fromJson(vehicle, Vehicle.class));
-				acc.setStatus(rs.getString(4));
+				acc.setStatus(gson.fromJson(rs.getString(4), AccountStatus.class));
 				drivers.add(acc);
 			}
 			con.close();
@@ -117,7 +117,7 @@ public class DriverService {
 			driverAccount.setId(rs.getString(1));
 			driverAccount.setDriver(gson.fromJson(rs.getString(2), VehicleDriver.class));
 			driverAccount.setVehicle(gson.fromJson(rs.getString(3), Vehicle.class));
-			driverAccount.setStatus(rs.getString(4));
+			driverAccount.setStatus(gson.fromJson(rs.getString(4), AccountStatus.class));
 
 			con.close();
 

@@ -7,9 +7,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import javax.ejb.EJB;
 import javax.ejb.Local;
 import javax.ejb.Stateless;
 
+import com.droppa.webapi.DroppaServices.Auth.CredentialsDTO;
 import com.droppa.webapi.DroppaServices.DTO.PersonDTO;
 import com.droppa.webapi.DroppaServices.common.ClientException;
 import com.droppa.webapi.DroppaServices.common.MySqlConnection;
@@ -17,12 +20,19 @@ import com.droppa.webapi.DroppaServices.core.AccountStatus;
 import com.droppa.webapi.DroppaServices.pojo.Person;
 import com.droppa.webapi.DroppaServices.pojo.UserAccount;
 import com.google.gson.Gson;
+import com.mysql.cj.protocol.AuthenticationProvider;
+
+import jakarta.inject.Inject;
 
 @Stateless
 @Local
 public class UserService {
 
-	private PartyService partyService = new PartyService();
+	@EJB
+	PartyService partyService = new PartyService();
+	@SuppressWarnings("rawtypes")
+	@Inject
+	private AuthenticationProvider provider;
 
 	private static final Logger logger = Logger.getLogger(UserService.class.getName());
 
@@ -51,6 +61,9 @@ public class UserService {
 				acc.setOtp(rs.getInt(4));
 				acc.setConfirmed(rs.getBoolean(3));
 				acc.setStatus(gson.fromJson(rs.getString(5), AccountStatus.class));
+
+				logger.info("========================== Fetching all users");
+
 				users.add(acc);
 			}
 			con.close();
@@ -61,9 +74,6 @@ public class UserService {
 	}
 
 	public PersonDTO createUserAccount(PersonDTO person) {
-
-		String owner = gson.toJson(person);
-		String status = gson.toJson(AccountStatus.AWAITING_CONFIRMATION);
 
 		try {
 			String check = "select * from users";
@@ -86,11 +96,11 @@ public class UserService {
 			String query = "insert into users(username,AccountOwner,IsConfirmed,Otp,Password,Status,Token) values(?,?,?,?,?,?,?)";
 			PreparedStatement ps = con.prepareStatement(query);
 			ps.setString(1, person.email);
-			ps.setString(2, owner);
+			ps.setString(2, gson.toJson(person));
 			ps.setBoolean(3, false);
 			ps.setInt(4, partyService.generateOTP(person.celphone));
 			ps.setString(5, person.password);
-			ps.setString(6, status);
+			ps.setString(6, gson.toJson(AccountStatus.AWAITING_CONFIRMATION));
 			ps.setString(7, partyService.generateToken());
 			ps.executeUpdate();
 
@@ -115,6 +125,9 @@ public class UserService {
 			extractedAccount.setOwner(gson.fromJson(rs.getString(2), Person.class));
 			extractedAccount.setConfirmed(rs.getBoolean(3));
 			extractedAccount.setStatus(gson.fromJson(rs.getString(6), AccountStatus.class));
+			extractedAccount.setOtp(rs.getInt(4));
+			extractedAccount.setPassword(rs.getString(5));
+			extractedAccount.setConfirmed(rs.getBoolean(3));
 
 			// con.close();
 
@@ -178,39 +191,33 @@ public class UserService {
 		String message = "User " + "'" + email + "'" + " was not found";
 		String status = gson.toJson(AccountStatus.ACTIVE);
 
+		UserAccount userAcc = getUserById(email);
+		if (userAcc.getId() == null)
+			throw new ClientException(message);
+
+		if (userAcc.getStatus().equals(AccountStatus.ACTIVE)) {
+			message = "Account already activated";
+			logger.info("======================= " + message);
+			throw new ClientException(message);
+		}
+
 		try {
-			String check = "select * from users where username=?";
-			PreparedStatement psc = con.prepareStatement(check);
-			psc.setString(1, email);
-			ResultSet rs = psc.executeQuery();
 
-			while (rs.next()) {
+			if (userAcc.getOtp() == otp) {
+				String query = "update users set IsConfirmed=?,status=? where username=?";
+				PreparedStatement pt = this.con.prepareStatement(query);
 
-				if (rs.getBoolean(3)) {
-					message = "Account already activated";
-					logger.info(message);
-					throw new ClientException(message);
-				}
-				if (rs.getInt(4) == otp) {
-					String query = "update users set IsConfirmed=?,status=? where username=?";
-					PreparedStatement pt = this.con.prepareStatement(query);
+				pt.setBoolean(1, true);
+				pt.setString(2, status);
+				pt.setString(3, email);
 
-					pt.setBoolean(1, true);
-					pt.setString(2, status);
-					pt.setString(3, email);
-
-					pt.executeUpdate();
-					message = "User Account Activated";
-					con.close();
-				} else {
-					message = "invalid OTP";
-					throw new ClientException("invalid OTP");
-				}
-
+				pt.executeUpdate();
+				message = "User Account Activated";
+				con.close();
+			} else {
+				message = "invalid OTP";
+				logger.info("========================= " + message);
 			}
-
-			if (!rs.next())
-				throw new ClientException(message);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -294,19 +301,14 @@ public class UserService {
 		return otp;
 	}
 
-	public UserAccount userLogin(String username, String password) {
-
-		users = (ArrayList<UserAccount>) getAllUsers();
-		for (int i = 0; i <= users.size() - 1; i++) {
-			if (users.get(i).getId().equals(username) && users.get(i).getPassword().equals(password)) {
-				extractedAccount.setId(users.get(i).getId());
-				extractedAccount.setOwner(users.get(i).getOwner());
-			} else {
-				throw new ClientException("invalid username and password");
-			}
-		}
-		return extractedAccount;
-	}
+	
+//	public void logout(CredentialsDTO credentialsDto) {
+//        if (provider.isValid(credentialsDto.token)) {
+//        	credentialsDto.token = null; //discard token
+//            return loginDTO;
+//        }
+//        throw new ClientException("Bad request"); //don't give too much detail to client here!
+//    }
 
 	public UserAccount autoUserLogin(String username) {
 
@@ -315,6 +317,9 @@ public class UserService {
 			if (users.get(i).getId().equals(username)) {
 				extractedAccount.setId(users.get(i).getId());
 				extractedAccount.setOwner(users.get(i).getOwner());
+				extractedAccount.setStatus(users.get(i).getStatus());
+				extractedAccount.setToken(users.get(i).getToken());
+
 			} else {
 				throw new ClientException("Auto login failed");
 			}

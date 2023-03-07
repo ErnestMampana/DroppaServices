@@ -1,5 +1,8 @@
 package com.droppa.webapi.DroppaServices.pojo;
 
+import jakarta.persistence.Entity;
+
+
 public class Person {
 	private String id;
 	private String userName;

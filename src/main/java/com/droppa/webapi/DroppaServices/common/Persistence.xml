@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/persistence
+                  http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+version="2.0">
+    <persistence-unit name="mysql_persistence_unit" transaction-type="RESOURCE_LOCAL">
+     <description> Droppa Clone JPA Configuration</description>
+    
+        <class>com.appsdeveloperblog.com.app.ws.io.entities.UserEntity</class>
+
+      <properties>
+        <property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
+        <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/database_name_here"/>
+        <property name="javax.persistence.jdbc.user" value="database user name here "/> 
+        <property name="javax.persistence.jdbc.password" value="database user password here"/>
+        
+        <property name="hibernate.id.new_generator_mappings" value="true"/> 
+        <property name="show_sql" value="true"/>
+        <property name="hibernate.hbm2ddl.auto" value="update"/>
+        <property name="hibernate.dialect" value="org.hibernate.dialect.MySQLDialect"/> 
+        </properties>
+ 
+    </persistence-unit>
+</persistence>

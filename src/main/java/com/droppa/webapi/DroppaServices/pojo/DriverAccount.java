@@ -1,5 +1,7 @@
 package com.droppa.webapi.DroppaServices.pojo;
 
+import com.droppa.webapi.DroppaServices.core.AccountStatus;
+
 import jakarta.validation.constraints.NotNull;
 
 public class DriverAccount {
@@ -8,7 +10,7 @@ public class DriverAccount {
 	private String id;
 	private Vehicle vehicle;
 	private VehicleDriver driver;
-	private String status;
+	private AccountStatus status;
 	
 	
 	public DriverAccount() {
@@ -16,7 +18,7 @@ public class DriverAccount {
 	}
 
 
-	public DriverAccount(@NotNull String id, Vehicle vehicle, VehicleDriver driver, String status) {
+	public DriverAccount(@NotNull String id, Vehicle vehicle, VehicleDriver driver, AccountStatus status) {
 		super();
 		this.id = id;
 		this.vehicle = vehicle;
@@ -55,12 +57,12 @@ public class DriverAccount {
 	}
 
 
-	public String getStatus() {
+	public AccountStatus getStatus() {
 		return status;
 	}
 
 
-	public void setStatus(String status) {
+	public void setStatus(AccountStatus status) {
 		this.status = status;
 	}
 	
